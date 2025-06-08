@@ -7,3 +7,5 @@ data class User(
     val birthDate: String,
     val phone: String
 )
+
+//user repository zum abrufen user zb getallusers oderso einbauen? - in app module oder?

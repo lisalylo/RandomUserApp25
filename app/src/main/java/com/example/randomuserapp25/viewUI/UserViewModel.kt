@@ -3,24 +3,26 @@ package com.example.randomuserapp25.viewUI
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
-import com.example.randomuserapp25.depInj.UserRepository
+import com.example.randomuserapp25.data.UserRepository
+import com.example.randomuserapp25.domain.User
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-class UserViewModel {
-    @HiltViewModel
-    class UserViewModel @Inject constructor(
-        private val repository: UserRepository
-    ) : ViewModel() {
+@HiltViewModel
+class UserViewModel @Inject constructor(
+    private val userRepository: UserRepository
+) : ViewModel() {
 
-        val users = repository.getLocalUsers().asLiveData()
+    val users: StateFlow<List<User>> = userRepository.getUsers()
+        .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
-        fun fetchAndStoreUsers() {
-            viewModelScope.launch {
-                val users = repository.fetchRemoteUsers()
-                users.forEach { repository.saveUser(it) }
-            }
-        }
+    fun addUser(user: User) = viewModelScope.launch {
+        userRepository.saveUser(user)
     }
+
+    //sortieren, aktualisieren, löschen etc. hier machen
 }
