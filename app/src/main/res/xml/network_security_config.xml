@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <base-config cleartextTrafficPermitted="true">
+        <trust-anchors>
+            <!-- System‐Zertifikate (Browser etc.) -->
+            <certificates src="system" />
+            <!-- User‐Zertifikate (z. B. eigene CA, Debug‐Proxy) -->
+            <certificates src="user" />
+        </trust-anchors>
+    </base-config>
+</network-security-config>

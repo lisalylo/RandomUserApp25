@@ -2,9 +2,10 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-    id("com.google.devtools.ksp") version "2.1.21-2.0.1"
-
+    alias(libs.plugins.ksp)
     id("com.google.dagger.hilt.android")
+    //kotlin("plugin.serialization") version "2.1.21"
+    id("org.jetbrains.kotlin.plugin.serialization") version "2.1.21"
 }
 
 android {
@@ -43,7 +44,7 @@ android {
 }
 
 dependencies {
-
+    implementation(libs.ktor.client.android)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -54,6 +55,8 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.transport.runtime)
     implementation(libs.androidx.room.runtime.android)
+    implementation(libs.firebase.dataconnect)
+    implementation(libs.androidx.window)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -63,11 +66,22 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
 
     implementation(libs.hilt.android)
+    implementation (libs.androidx.hilt.navigation.compose)
+
     ksp(libs.hilt.android.compiler)
+    ksp(libs.androidx.room.compiler)
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
 
     implementation(libs.ktor.client.core)
-    implementation(libs.ktor.client.okhttp)
+    //implementation(libs.ktor.client.okhttp)
     implementation(libs.ktor.client.content.negotiation)
     implementation(libs.ktor.serialization.kotlinx.json)
+    implementation(libs.ktor.client.logging)
+    implementation(libs.okhttp3.logging.interceptor)
+   // implementation(libs.ktor.client.cio)
+
     implementation(libs.kotlinx.serialization.json)
+
+    implementation (libs.coil.compose)
 }

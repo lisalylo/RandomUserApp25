@@ -1,28 +1,109 @@
+/*package com.example.randomuserapp25.ui
+
+import android.util.Log
+import com.example.randomuserapp25.data.UserRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.launch
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import javax.inject.Inject*/
+
+/**
+ * Anzeige + Aktualisierung user Liste
+ */
+// UserListViewModel.kt
+/*@HiltViewModel
+class UserListViewModel @Inject constructor(
+    private val repository: UserRepository
+) : ViewModel() {
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading: StateFlow<Boolean> = _isLoading
+
+    val users = repository.getUsers()
+        .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
+
+    init {
+        refreshUsers()
+    }
+
+    fun refreshUsers(count: Int = 10) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            try {
+                repository.refreshUsersFromRemote(count)
+            } catch (t: Throwable) {
+                Log.e("UserListVM", "refresh failed", t)
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+}*/
 package com.example.randomuserapp25.viewUI
 
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.asLiveData
-import androidx.lifecycle.viewModelScope
+import android.util.Log
+import com.example.randomuserapp25.data.SortField
 import com.example.randomuserapp25.data.UserRepository
 import com.example.randomuserapp25.domain.User
 import dagger.hilt.android.lifecycle.HiltViewModel
-import jakarta.inject.Inject
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import javax.inject.Inject
 
 @HiltViewModel
-class UserViewModel @Inject constructor(
-    private val userRepository: UserRepository
+class UserListViewModel @Inject constructor(
+    private val repository: UserRepository
 ) : ViewModel() {
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading: StateFlow<Boolean> = _isLoading
 
-    val users: StateFlow<List<User>> = userRepository.getUsers()
+    private val _sortField = MutableStateFlow(SortField.NAME)
+    val sortField: StateFlow<SortField> = _sortField.asStateFlow()
+
+    private val _sortAscending = MutableStateFlow(true)
+    val sortAscending: StateFlow<Boolean> = _sortAscending.asStateFlow()
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val users: StateFlow<List<User>> = combine(
+        _sortField,
+        _sortAscending
+    ) { field, asc ->
+        field to asc
+    }
+        .flatMapLatest { (field, asc) ->
+            repository.getUsersSortedBy(field, ascending = asc)
+        }
         .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
-    fun addUser(user: User) = viewModelScope.launch {
-        userRepository.saveUser(user)
+    init {
+        refreshUsers()
     }
 
-    //sortieren, aktualisieren, löschen etc. hier machen
+    fun setSortField(field: SortField) {
+        _sortField.value = field
+    }
+
+    fun toggleSortOrder() {
+        _sortAscending.value = !_sortAscending.value
+    }
+
+    fun refreshUsers(count: Int = 10) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            try {
+                repository.refreshUsersFromRemote(count)
+            } catch (t: Throwable) {
+                Log.e("UserListVM", "refresh failed", t)
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
 }

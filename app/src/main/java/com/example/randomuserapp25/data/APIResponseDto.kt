@@ -1,13 +1,12 @@
 package com.example.randomuserapp25.data
 
+import kotlinx.serialization.Serializable
 import com.example.randomuserapp25.domain.User
 
-//Struktur Response API Response (JSON Daten in kotlin objekte deserializen)
-//nur Datentransport -> deshalb Dto
-data class ApiResponseDto(
-    val results: List<UserDto>
-)
+@Serializable
+data class ApiResponseDto(val results: List<UserDto>)
 
+@Serializable
 data class UserDto(
     val login: Login,
     val name: Name,
@@ -16,15 +15,20 @@ data class UserDto(
     val picture: Picture
 )
 
+@Serializable
 data class Login(val uuid: String)
+@Serializable
 data class Name(val first: String, val last: String)
+@Serializable
 data class Dob(val date: String)
+@Serializable
 data class Picture(val large: String)
 
+/** ganz wichtig: Extension hier, damit wir von UserDto → User kommen */
 fun UserDto.toDomain(): User = User(
-    id = login.uuid,
-    name = "${name.first} ${name.last}",
-    photoUrl = picture.large,
+    id        = login.uuid,
+    name      = "${name.first} ${name.last}",
+    photoUrl  = picture.large,
     birthDate = dob.date,
-    phone = phone
+    phone     = phone
 )
