@@ -1,26 +1,48 @@
 package com.example.randomuserapp25.viewUI
 
+import android.graphics.Bitmap
+import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.randomuserapp25.arData.QrCodeGenerator
 import com.example.randomuserapp25.data.UserRepository
 import com.example.randomuserapp25.domain.User
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.SharingStarted
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.SavedStateHandle
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class UserDetailsViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    private val repository: UserRepository
+    private val repository: UserRepository,
+    private val qrGenerator: QrCodeGenerator
 ) : ViewModel() {
+
     private val userId: String = checkNotNull(savedStateHandle["userId"])
 
-    val user: StateFlow<User?> = repository.getUsers()
-        .map { list -> list.find { it.id == userId } }
-        .stateIn(viewModelScope, SharingStarted.Lazily, null)
+    private val _user = MutableStateFlow<User?>(null)
+    val user: StateFlow<User?> = _user.asStateFlow()
+
+    private val _qrBitmap = MutableStateFlow<Bitmap?>(null)
+    val qrBitmap: StateFlow<Bitmap?> = _qrBitmap.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            // 1) Liste aller User holen
+            val list: List<User> = repository.getUsers().first()
+
+            // 2) Gesuchten User finden
+            val found: User? = list.firstOrNull { it.id == userId }
+
+            // 3) Werte setzen
+            found?.let { u ->
+                _user.value = u
+                _qrBitmap.value = qrGenerator.generate(u.id, size = 256)
+            }
+        }
+    }
 }

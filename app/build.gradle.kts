@@ -64,15 +64,20 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
-
+    implementation(libs.kotlinx.serialization.json)
     implementation(libs.hilt.android)
     implementation (libs.androidx.hilt.navigation.compose)
+    implementation (libs.coil.compose)
 
+    //hilt (depinj)
     ksp(libs.hilt.android.compiler)
+
+    //room (db)
     ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
 
+    //ktor (client api)
     implementation(libs.ktor.client.core)
     //implementation(libs.ktor.client.okhttp)
     implementation(libs.ktor.client.content.negotiation)
@@ -81,7 +86,18 @@ dependencies {
     implementation(libs.okhttp3.logging.interceptor)
    // implementation(libs.ktor.client.cio)
 
-    implementation(libs.kotlinx.serialization.json)
+    // CameraX
+    implementation(libs.androidx.camera.core)
+    implementation(libs.androidx.camera.camera2)
+    implementation(libs.androidx.camera.lifecycle)
+    implementation(libs.androidx.camera.view)
+    implementation(libs.androidx.camera.extensions)
 
-    implementation (libs.coil.compose)
+    // ML Kit Barcode Scanning (offline)
+    implementation(libs.barcode.scanning)
+    implementation(libs.barcode.scanning.v1722)
+    implementation(libs.guava)
+
+    //ZXing Core (QR-Code-Generierung)
+    implementation(libs.zxing.core)
 }

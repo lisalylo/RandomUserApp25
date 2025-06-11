@@ -150,6 +150,7 @@ import coil.compose.AsyncImage
 import com.example.randomuserapp25.data.SortField
 import com.example.randomuserapp25.domain.User
 import java.util.UUID
+import androidx.compose.material.icons.filled.Info
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -168,13 +169,8 @@ fun OverviewScreen(
             TopAppBar(
                 title = { Text("Random Users") },
                 actions = {
-                    Text(
-                        text = "Sort",
-                        style = MaterialTheme.typography.bodyLarge,
-                        modifier = Modifier.padding(end = 4.dp)
-                    )
                     IconButton(onClick = { showMenu = true }) {
-                        Icon(Icons.Default.Search, contentDescription = "Sortieren")
+                        Icon(Icons.Default.Info, contentDescription = "Sortieren")
                     }
                     DropdownMenu(
                         expanded = showMenu,
@@ -208,6 +204,14 @@ fun OverviewScreen(
 
                     IconButton(onClick = { viewModel.refreshUsers() }) {
                         Icon(Icons.Default.Refresh, contentDescription = "Refresh")
+                    }
+                    IconButton(onClick = {
+                        navController.navigate("ar")
+                    }) {
+                        Icon(
+                            imageVector = Icons.Default.Search,
+                            contentDescription = "AR Camera"
+                        )
                     }
                 }
             )

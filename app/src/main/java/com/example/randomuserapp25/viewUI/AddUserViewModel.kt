@@ -1,4 +1,4 @@
-package com.example.randomuserapp25.viewUI
+/*package com.example.randomuserapp25.viewUI
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -44,3 +44,4 @@ class AddUserViewModel @Inject constructor(
         repository.saveUser(user)
     }
 }
+*/
