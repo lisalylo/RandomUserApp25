@@ -23,5 +23,5 @@ https://github.com/lisalylo/RandomUserApp25
 
 ## Projekt und Dependencies
 Das Projekt wurde in Android Studio mit Kotlin erstellt, Version: Android 9
-Zum Starten des Projektes werden verschiedene libs/plugins... benötigt. Diese sind alle in dem Gradle Scripts Ordner aufzufinden (build.Gradle.kts, libs.versions.toml).
+Zum Starten des Projektes werden verschiedene libs/plugins... benötigt. Diese sind alle in dem Gradle Ordner aufzufinden (libs.versions.toml).
 
