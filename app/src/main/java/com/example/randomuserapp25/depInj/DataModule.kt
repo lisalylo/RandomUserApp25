@@ -7,9 +7,15 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
+/**
+ * API-Zugriffe global über Hilt verfügbar machen
+ */
 @Module
 @InstallIn(SingletonComponent::class)
 object DataModule {
+    /**
+     * Instanz Remote-Datenquelle zu verfügung stellen
+     */
     @Provides
     @Singleton
     fun provideUserRemoteDataSource(): UserRemoteDataSource =

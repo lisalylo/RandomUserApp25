@@ -5,8 +5,8 @@ import androidx.room.RoomDatabase
 import com.example.randomuserapp25.domain.UserEntity
 
 /**
- * Haupt‐Datenbankklasse für Room
- * Room generiert automatisch die Implementierung AppDatabase_Impl
+ * Haupt‐DB-KLasse für Room
+ * Room generiert automatisch Implementierung
  */
 @Database(
     entities = [UserEntity::class],
@@ -15,6 +15,5 @@ import com.example.randomuserapp25.domain.UserEntity
 )
 
 abstract class AppDatabase : RoomDatabase() {
-    /** Liefert das DAO für User‐Operationen */
     abstract fun userDao(): UserDao
 }

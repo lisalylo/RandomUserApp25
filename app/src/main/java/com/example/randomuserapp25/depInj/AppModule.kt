@@ -14,6 +14,10 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
+/**
+ * Zentrales Hilt-Module für Bereitstellung Abhängigkeiten
+ * gibt Komponenten Instances von Room-DB, DAO, Repository
+ */
 @Module
 @InstallIn(SingletonComponent::class)
 object AppModule {
@@ -29,7 +33,6 @@ object AppModule {
     fun provideUserDao(db: AppDatabase): UserDao =
         db.userDao()
 
-    //RemoteDataSource (im NetworkModule bereitgestellt)
     @Provides
     fun provideUserRepository(
         dao: UserDao,

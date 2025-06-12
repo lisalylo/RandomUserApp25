@@ -17,10 +17,9 @@ interface UserRepository {
     suspend fun updateUser(user: User)
     suspend fun deleteAllUsers()
 
-    suspend fun fetchRemoteUsers(count: Int = 10): List<User> //ruft user über remoteData (von website) auf - nur aufrufen, kein speichern
+    suspend fun fetchRemoteUsers(count: Int = 10): List<User>
     /**
-     * Lädt `count` User von der API, leert lokale DB und speichert die neu
-     * geladenen User in der DB
+     * Lädt User von API, leert lokale DB, speichert neu geladene User in DB
      */
     suspend fun refreshUsersFromRemote(count: Int = 10)
 }

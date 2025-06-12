@@ -1,7 +1,6 @@
 package com.example.randomuserapp25
 
 import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -16,8 +15,6 @@ import dagger.hilt.android.AndroidEntryPoint
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.fragment.app.FragmentActivity
-import com.example.randomuserapp25.ui.theme.RandomUserApp25Theme
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {

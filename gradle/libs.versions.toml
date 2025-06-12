@@ -12,6 +12,7 @@ guava = "32.1.3-android"
 hiltAndroidCompiler = "2.56.2"
 hiltNavigationCompose = "1.2.0"
 kotlin = "2.1.21"
+kotlinxCoroutinesGuavaVersion = "1.6.4"
 ksp = "2.1.21-2.0.1"
 coreKtx = "1.16.0"
 junit = "4.13.2"
@@ -56,6 +57,7 @@ google-core = { module = "com.google.ar.sceneform:core", version.ref = "googleCo
 guava = { module = "com.google.guava:guava", version.ref = "guava" }
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hiltAndroidCompiler" }
 hilt-android-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hiltAndroidCompiler" }
+jetbrains-kotlinx-coroutines-guava = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-guava", version.ref = "kotlinxCoroutinesGuavaVersion" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }

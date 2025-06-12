@@ -12,8 +12,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import coil.compose.AsyncImage
-import com.example.randomuserapp25.viewUI.EditUserViewModel
 import androidx.hilt.navigation.compose.hiltViewModel
 import kotlinx.coroutines.launch
 import java.time.Instant
@@ -38,6 +36,12 @@ fun EditUserScreen(
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
 
+    /**
+     * damit bday auch bei manuellen User richtig angezeigt wird -> datepicker
+     * 1. Anzeigeformat definieren
+     * 2. Initialisierung Anzeige-String
+     * 3. Erstellung DatePickerDialog
+     */
     val fmt = DateTimeFormatter.ofPattern("dd.MM.yyyy")
     var dateText by remember(birthDateIso) {
         mutableStateOf(
@@ -106,13 +110,13 @@ fun EditUserScreen(
             ) {
                 OutlinedTextField(
                     value = dateText,
-                    onValueChange = {},                     // bleibt leer
+                    onValueChange = {},
                     label = { Text("Birth Date") },
                     readOnly = true,
-                    enabled = false,                        // hier deaktivieren!
+                    enabled = false,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable { dpd.show() }           // und hier drauf reagieren
+                        .clickable { dpd.show() }
                 )
             }
             OutlinedTextField(

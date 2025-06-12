@@ -3,6 +3,10 @@ package com.example.randomuserapp25.data
 import kotlinx.serialization.Serializable
 import com.example.randomuserapp25.domain.User
 
+/**
+ * Datenklasse für API-Antwort
+ * API liefert JSON-Objekt
+ */
 @Serializable
 data class ApiResponseDto(val results: List<UserDto>)
 
@@ -24,7 +28,10 @@ data class Dob(val date: String)
 @Serializable
 data class Picture(val large: String)
 
-/** ganz wichtig: Extension hier, damit wir von UserDto → User kommen */
+/**
+ * Konvertiert UserDto in Domain-Modell User
+ */
+
 fun UserDto.toDomain(): User = User(
     id        = login.uuid,
     name      = "${name.first} ${name.last}",

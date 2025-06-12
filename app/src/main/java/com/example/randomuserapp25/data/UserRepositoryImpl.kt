@@ -11,6 +11,12 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 
+/**
+ * Implementierung Interface
+ * dao Zugriff auf lokale DB
+ * remote Zugriff auf Remote api (UserRemoteDataSource)
+ */
+
 @Singleton
 class UserRepositoryImpl @Inject constructor(
     private val dao: UserDao,
@@ -44,7 +50,7 @@ class UserRepositoryImpl @Inject constructor(
         dao.deleteAll()
 
     override suspend fun refreshUsersFromRemote(count: Int) {
-        Log.d("Repo", "Start refreshing…")
+        Log.d("Repo", "Start refreshing")
         val users = remote.fetchUsers(count).map { it.toDomain() }
         if (users.isEmpty()) {
             Log.w("Repo", "no data, aborting")

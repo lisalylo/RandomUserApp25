@@ -13,9 +13,13 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.launch
-import java.util.UUID
 import javax.inject.Inject
 
+/**
+ * 1. Verwaltung lokale Zustände für User-Eigenschaften
+ * 2. Holt wenn id bestehend originalen User aus Repo und initialisiert Felder
+ * 3. Methoden Änderung einzelner Felder, Speichern User über Repo
+ */
 @HiltViewModel
 class EditUserViewModel @Inject constructor(
     private val repository: UserRepository,
@@ -23,12 +27,10 @@ class EditUserViewModel @Inject constructor(
 ) : ViewModel() {
     private val userId: String = checkNotNull(savedStateHandle["userId"])
 
-    // Original User fetched from repository
     val originalUser: StateFlow<User?> = repository.getUsers()
         .map { list -> list.find { it.id == userId } }
         .stateIn(viewModelScope, SharingStarted.Lazily, null)
 
-    // Editable fields
     private val _name = MutableStateFlow("")
     val name: StateFlow<String> = _name.asStateFlow()
 
@@ -42,7 +44,6 @@ class EditUserViewModel @Inject constructor(
     val photoUrl: StateFlow<String> = _photoUrl.asStateFlow()
 
     init {
-        // Initialize editable fields with original values
         viewModelScope.launch {
             originalUser.collect { user ->
                 user?.let {

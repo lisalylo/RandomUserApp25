@@ -97,6 +97,7 @@ dependencies {
     implementation(libs.barcode.scanning)
     implementation(libs.barcode.scanning.v1722)
     implementation(libs.guava)
+    implementation(libs.jetbrains.kotlinx.coroutines.guava)
 
     //ZXing Core (QR-Code-Generierung)
     implementation(libs.zxing.core)

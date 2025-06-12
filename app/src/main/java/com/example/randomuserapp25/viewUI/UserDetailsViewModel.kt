@@ -30,15 +30,15 @@ class UserDetailsViewModel @Inject constructor(
     private val _qrBitmap = MutableStateFlow<Bitmap?>(null)
     val qrBitmap: StateFlow<Bitmap?> = _qrBitmap.asStateFlow()
 
+    /**
+     * 1. liste aller user holen
+     * 2. gesuchten user finden
+     * 3. werte setzen
+     */
     init {
         viewModelScope.launch {
-            // 1) Liste aller User holen
             val list: List<User> = repository.getUsers().first()
-
-            // 2) Gesuchten User finden
             val found: User? = list.firstOrNull { it.id == userId }
-
-            // 3) Werte setzen
             found?.let { u ->
                 _user.value = u
                 _qrBitmap.value = qrGenerator.generate(u.id, size = 256)
