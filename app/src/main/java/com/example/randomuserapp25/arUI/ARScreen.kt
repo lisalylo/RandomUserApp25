@@ -8,10 +8,7 @@ import android.util.Size
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.OptIn
-import androidx.camera.core.CameraSelector
-import androidx.camera.core.ExperimentalGetImage
-import androidx.camera.core.ImageAnalysis
-import androidx.camera.core.Preview
+import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.compose.foundation.Canvas
@@ -22,7 +19,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.input.pointer.pointerInput
@@ -47,9 +43,9 @@ fun ArScreen(
     viewModel: ArScreenViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
-    val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
+    val lifecycleOwner = LocalLifecycleOwner.current
 
-    // Camera permission
+    // 1) Kamera-Permission
     var granted by remember {
         mutableStateOf(
             ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) ==
@@ -64,11 +60,16 @@ fun ArScreen(
     }
     if (!granted) return
 
-    // PreviewView size
+    // 2) PreviewView + Größe tracken
     var previewSize by remember { mutableStateOf(IntSize.Zero) }
-    val previewView = remember { PreviewView(context) }
+    val previewView = remember {
+        PreviewView(context).apply {
+            scaleType = PreviewView.ScaleType.FIT_CENTER
+            implementationMode = PreviewView.ImplementationMode.COMPATIBLE
+        }
+    }
 
-    // Detected user overlay
+    // 3) Erkanntes User-Overlay
     val detected by viewModel.detected.collectAsState()
 
     Box(
@@ -78,100 +79,109 @@ fun ArScreen(
                 previewSize = coords.size
             }
     ) {
-        // CameraX preview
+        // 4) Kamera-Preview
         AndroidView(
             factory = { previewView },
             modifier = Modifier.fillMaxSize()
         )
 
-        // Overlay & tap handling
-        detected?.let { du ->
-            Canvas(
-                Modifier
-                    .fillMaxSize()
-                    .pointerInput(du.user.id) {
-                        detectTapGestures { pt ->
-                            du.corners?.let { corners ->
-                                if (isInsidePolygon(pt, corners)) {
-                                    onUserClick(du.user)
-                                }
-                            }
+        // 5) Scan-Quadrat und Overlay
+        Canvas(
+            Modifier
+                .fillMaxSize()
+                .pointerInput(detected?.user?.id ?: "") {
+                    detectTapGestures { pt ->
+                        // Tap nur innerhalb des Quadrats auslösen
+                        val vw = previewSize.width.toFloat()
+                        val vh = previewSize.height.toFloat()
+                        if (vw == 0f || vh == 0f) return@detectTapGestures
+
+                        val side = min(vw, vh) * 0.6f
+                        val left = (vw - side) / 2f
+                        val top = (vh - side) / 2f
+
+                        if (pt.x in left..(left + side) && pt.y in top..(top + side)) {
+                            detected?.let { onUserClick(it.user) }
                         }
                     }
-            ) {
-                val vw = previewSize.width.toFloat()
-                val vh = previewSize.height.toFloat()
-                if (vw == 0f || vh == 0f) return@Canvas
+                }
+        ) {
+            val vw = previewSize.width.toFloat()
+            val vh = previewSize.height.toFloat()
+            if (vw == 0f || vh == 0f) return@Canvas
 
-                // Letterboxing scale and offset
-                val scale = min(vw / 1280f, vh / 720f)
-                val dx = (vw - 1280f * scale) / 2f
-                val dy = (vh - 720f * scale) / 2f
+            // Größe und Position des Scan-Quadrats
+            val side = min(vw, vh) * 0.6f
+            val left = (vw - side) / 2f
+            val top = (vh - side) / 2f
 
-                // Map corners
-                val mapped = du.corners!!.map { Offset(it.x * scale + dx, it.y * scale + dy) }
+            // 5.1 Scan-Rahmen
+            drawRect(
+                color = Color.White,
+                topLeft = Offset(left, top),
+                size = androidx.compose.ui.geometry.Size(side, side),
+                style = androidx.compose.ui.graphics.drawscope.Stroke(width = 4f)
+            )
 
-                // Draw overlay polygon
-                drawPath(Path().apply {
-                    moveTo(mapped[0].x, mapped[0].y)
-                    lineTo(mapped[1].x, mapped[1].y)
-                    lineTo(mapped[2].x, mapped[2].y)
-                    lineTo(mapped[3].x, mapped[3].y)
-                    close()
-                }, color = Color(0x660000FF), style = Fill)
-
-                // Draw user name
-                drawContext.canvas.nativeCanvas.drawText(
-                    du.user.name,
-                    mapped[0].x,
-                    mapped[0].y - 20f,
-                    Paint().apply {
-                        color = android.graphics.Color.WHITE
-                        textSize = 48f
-                        isAntiAlias = true
-                    }
+            // 5.2 User-Overlay **immer** im Quadrat zentriert
+            detected?.let { du ->
+                // halbtransparenter Hintergrund
+                drawRect(
+                    color = Color(0x44000000),
+                    topLeft = Offset(left, top),
+                    size = androidx.compose.ui.geometry.Size(side, side),
+                    style = Fill
                 )
+                // Name in die Mitte des Quadrats
+                drawContext.canvas.nativeCanvas.apply {
+                    drawText(
+                        du.user.name,
+                        left + side / 2f,
+                        top + side / 2f + 20f,
+                        Paint().apply {
+                            color = android.graphics.Color.WHITE
+                            textSize = 60f
+                            textAlign = Paint.Align.CENTER
+                            isAntiAlias = true
+                        }
+                    )
+                }
             }
         }
     }
 
-    // CameraX + ML Kit setup
+    // 6) CameraX + ML Kit für QR-Scan
     LaunchedEffect(previewView) {
-        val providerFuture = ProcessCameraProvider.getInstance(context)
-        providerFuture.addListener({
-            val cameraProvider = providerFuture.get()
+        val cameraProviderF = ProcessCameraProvider.getInstance(context)
+        cameraProviderF.addListener({
+            val cameraProvider = cameraProviderF.get()
 
-            // Preview use case
-            val previewUseCase = Preview.Builder().build().also {
-                it.surfaceProvider = previewView.surfaceProvider
-            }
+            // Preview-UseCase
+            val previewUseCase = Preview.Builder()
+                .setTargetRotation(previewView.display.rotation)
+                .build()
+                .also { it.setSurfaceProvider(previewView.surfaceProvider) }
 
-            // QR-only scanner
+            // QR-only Scanner
             val options = BarcodeScannerOptions.Builder()
                 .setBarcodeFormats(Barcode.FORMAT_QR_CODE)
                 .build()
             val scanner = BarcodeScanning.getClient(options)
 
-            // Analysis use case
+            // Analysis-UseCase
             val analysisUseCase = ImageAnalysis.Builder()
+                .setTargetRotation(previewView.display.rotation)
                 .setTargetResolution(Size(1280, 720))
                 .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                 .build()
                 .also { useCase ->
                     useCase.setAnalyzer(ContextCompat.getMainExecutor(context)) { proxy ->
                         proxy.image?.let { mediaImage ->
-                            val input = InputImage.fromMediaImage(
-                                mediaImage,
-                                proxy.imageInfo.rotationDegrees
-                            )
+                            val input = InputImage.fromMediaImage(mediaImage, proxy.imageInfo.rotationDegrees)
                             Log.d("ArScreen", "Analyzing frame")
                             scanner.process(input)
                                 .addOnSuccessListener { barcodes: List<Barcode> ->
-                                    Log.d("ArScreen", "Found ${barcodes.size} barcodes")
                                     viewModel.onBarcodes(barcodes)
-                                }
-                                .addOnFailureListener { e ->
-                                    Log.e("ArScreen", "Scan failed", e)
                                 }
                                 .addOnCompleteListener { proxy.close() }
                         } ?: proxy.close()
@@ -187,17 +197,4 @@ fun ArScreen(
             )
         }, ContextCompat.getMainExecutor(context))
     }
-}
-
-fun isInsidePolygon(pt: Offset, polygon: List<Offset>): Boolean {
-    var inside = false
-    polygon.forEachIndexed { i, p1 ->
-        val p2 = polygon[(i + 1) % polygon.size]
-        if (((p1.y > pt.y) != (p2.y > pt.y)) &&
-            (pt.x < (p2.x - p1.x) * (pt.y - p1.y) / (p2.y - p1.y) + p1.x)
-        ) {
-            inside = !inside
-        }
-    }
-    return inside
 }
