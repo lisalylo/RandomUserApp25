@@ -38,6 +38,7 @@ import kotlin.math.min
 
 @OptIn(ExperimentalGetImage::class)
 @Composable
+//ist nicht mehr wirklich AR, nur Info-Quadrat auf QR-Code
 fun ArScreen(
     onUserClick: (User) -> Unit,
     viewModel: ArScreenViewModel = hiltViewModel()
@@ -45,7 +46,7 @@ fun ArScreen(
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
 
-    // 1) Kamera-Permission
+    //Kamera-Permission
     var granted by remember {
         mutableStateOf(
             ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) ==
@@ -60,7 +61,7 @@ fun ArScreen(
     }
     if (!granted) return
 
-    // 2) PreviewView + Größe tracken
+    //PreviewView + Größe tracken
     var previewSize by remember { mutableStateOf(IntSize.Zero) }
     val previewView = remember {
         PreviewView(context).apply {
@@ -69,7 +70,7 @@ fun ArScreen(
         }
     }
 
-    // 3) Erkanntes User-Overlay
+    //Erkanntes User-Overlay
     val detected by viewModel.detected.collectAsState()
 
     Box(
@@ -79,19 +80,19 @@ fun ArScreen(
                 previewSize = coords.size
             }
     ) {
-        // 4) Kamera-Preview
+        //Kamera-Preview
         AndroidView(
             factory = { previewView },
             modifier = Modifier.fillMaxSize()
         )
 
-        // 5) Scan-Quadrat und Overlay
+        //Scan-Quadrat und Overlay
         Canvas(
             Modifier
                 .fillMaxSize()
                 .pointerInput(detected?.user?.id ?: "") {
                     detectTapGestures { pt ->
-                        // Tap nur innerhalb des Quadrats auslösen
+                        //Tap nur innerhalb Quadrat auslösen (für user details)
                         val vw = previewSize.width.toFloat()
                         val vh = previewSize.height.toFloat()
                         if (vw == 0f || vh == 0f) return@detectTapGestures
@@ -110,12 +111,12 @@ fun ArScreen(
             val vh = previewSize.height.toFloat()
             if (vw == 0f || vh == 0f) return@Canvas
 
-            // Größe und Position des Scan-Quadrats
+            //Größe + Position Scan-Quadrat
             val side = min(vw, vh) * 0.6f
             val left = (vw - side) / 2f
             val top = (vh - side) / 2f
 
-            // 5.1 Scan-Rahmen
+            //Scan-Rahmen
             drawRect(
                 color = Color.White,
                 topLeft = Offset(left, top),
@@ -123,16 +124,15 @@ fun ArScreen(
                 style = androidx.compose.ui.graphics.drawscope.Stroke(width = 4f)
             )
 
-            // 5.2 User-Overlay **immer** im Quadrat zentriert
+            //User overlay im Quadrat zentriert
             detected?.let { du ->
-                // halbtransparenter Hintergrund
                 drawRect(
                     color = Color(0x44000000),
                     topLeft = Offset(left, top),
                     size = androidx.compose.ui.geometry.Size(side, side),
                     style = Fill
                 )
-                // Name in die Mitte des Quadrats
+                // Name in Mitte Quadrat
                 drawContext.canvas.nativeCanvas.apply {
                     drawText(
                         du.user.name,
@@ -150,25 +150,25 @@ fun ArScreen(
         }
     }
 
-    // 6) CameraX + ML Kit für QR-Scan
+    //CameraX + ML Kit für QR-Scan
     LaunchedEffect(previewView) {
         val cameraProviderF = ProcessCameraProvider.getInstance(context)
         cameraProviderF.addListener({
             val cameraProvider = cameraProviderF.get()
 
-            // Preview-UseCase
+            //Preview-UseCase
             val previewUseCase = Preview.Builder()
                 .setTargetRotation(previewView.display.rotation)
                 .build()
                 .also { it.setSurfaceProvider(previewView.surfaceProvider) }
 
-            // QR-only Scanner
+            //QR-only Scanner (muss eigentlich nicht, aber da es nur QR codes gibt)
             val options = BarcodeScannerOptions.Builder()
                 .setBarcodeFormats(Barcode.FORMAT_QR_CODE)
                 .build()
             val scanner = BarcodeScanning.getClient(options)
 
-            // Analysis-UseCase
+            //Analysis-UseCase
             val analysisUseCase = ImageAnalysis.Builder()
                 .setTargetRotation(previewView.display.rotation)
                 .setTargetResolution(Size(1280, 720))

@@ -10,7 +10,7 @@ import androidx.core.graphics.createBitmap
 import androidx.core.graphics.set
 
 /**
- * erzeugt aus User-ID QR-code
+ * erzeugt aus User-id QR-code
  */
 class QrCodeGenerator @Inject constructor() {
     fun generate(userId: String, size: Int = 512): Bitmap {

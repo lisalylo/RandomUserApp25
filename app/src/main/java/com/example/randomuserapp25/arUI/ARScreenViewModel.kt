@@ -12,7 +12,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /**
- * ViewModel für den AR-Screen.
+ * ViewModel für AR-Screen
  * - Baut die ImageDatabase auf
  * - Erkennt getrackte Images und mapped sie auf User
  */
